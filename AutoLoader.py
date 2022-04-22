@@ -7,7 +7,7 @@ folders aren't adding in correct order
 add icon loading functionality
 '''
 
-class GizmoAutoLoader():
+class AutoLoader():
     VALID_GIZMO_FILE_TYPES = ['.gizmo', '.nk']
     VALID_ICON_FILE_TYPES = ['.jpg', '.jpeg', '.png']
 
