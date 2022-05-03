@@ -3,7 +3,6 @@ import typing
 from pathlib import Path
 '''
 TODO:
-- Icons dont seem to be loading
 - expand program to run with scripts
 '''
 
@@ -11,9 +10,9 @@ class AutoLoader():
     VALID_GIZMO_FILE_TYPES = ['.gizmo', '.nk']
     VALID_ICON_FILE_TYPES = ['.jpg', '.jpeg', '.png']
 
-    def __init__(self, directory: str, toolbar) -> None:
+    def __init__(self, directory: str, toolbar: object) -> None:
         '''
-        Constructor to initilize the object
+        Constructor to initialize the object
 
         Parameters
         ----------
@@ -56,6 +55,29 @@ class AutoLoader():
                 relative_path = f"{relative_path}/{part}"
         return relative_path
 
+    def fetch_icons(self, folder: Path) -> dict:
+        '''
+        Creates a dictionary of all files in the specified directory containing
+        an extension defined in VALID_ICON_FILE_TYPES
+
+        Parameters
+        ---------
+        folder: Path
+            A full-length file path
+
+        Returns
+        -------
+        icons: dict
+            A dictionary containing the stem of the image file (no extension) for
+            the keys and the name of the image file (with extension) for the
+            values.
+        '''
+        icons = {}
+        for file in folder.glob('*.*'):
+            if file.suffix in self.VALID_ICON_FILE_TYPES:
+                icons.update({file.stem: file.name})
+        return icons
+
     def populate_toolbar(self) -> None:
         '''
         Loads all .gizmo and .nk files from ``directory`` to the ``toolbar``
@@ -69,22 +91,18 @@ class AutoLoader():
         -------
         None
         '''
-        icons = {}
         nuke.pluginAddPath(self.directory, False)
         p = Path(self.directory)
         for folder in p.glob('**/'):
             if folder.name != p.name:
-                nuke.pluginAddPath(self.retrieve_relative_path(folder), False)
+                nuke.pluginAddPath(self.retrieve_relative_path(folder))
+            icons = self.fetch_icons(folder)
             for file in folder.glob('*.*'):
-                if file.suffix in self.VALID_ICON_FILE_TYPES:
-                    icon_name = file.stem
-                    icon_relative_path = self.retrieve_relative_path(file)
-                    icons.update({icon_name: icon_relative_path})
                 if file.suffix in self.VALID_GIZMO_FILE_TYPES:
                     shelf_name = self.retrieve_relative_path(file)
                     create_node = f"nuke.createNode('{file.stem}')"
                     if file.stem in icons:
-                        icon = icons[file.stem]
+                        icon_tile = icons[file.stem]
                     else:
-                        icon = ""
-                    self.toolbar.addCommand(shelf_name, create_node, icon)
+                        icon_tile = ""
+                    self.toolbar.addCommand(shelf_name, create_node, icon=icon_tile)
