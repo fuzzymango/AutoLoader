@@ -1,4 +1,3 @@
-from AutoLoader import AutoLoader
 '''
 ENABLE THE AUTO LOADER
 
@@ -13,5 +12,6 @@ EXAMPLE:
 myToolbar = nuke.menu('Nodes').addMenu('MyGizmos')
 loader = AutoLoader(toolbar = myToolbar, directory = r"C:\Users\isaac.spiegel\.nuke\gizmos")
 '''
+from AutoLoader import AutoLoader
 loader = AutoLoader()
 loader.populate_toolbar()
