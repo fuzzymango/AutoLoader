@@ -1,18 +1,25 @@
 import nuke
 import typing
 from pathlib import Path
+import pathlib
 '''
 TODO:
-- expand program to run with scripts
+- expand program to run with scripts and toolsets
 '''
 
 class AutoLoader():
-    VALID_GIZMO_FILE_TYPES = ['.gizmo', '.nk']
+    VALID_GIZMO_FILE_TYPES = ['.gizmo']
     VALID_ICON_FILE_TYPES = ['.jpg', '.jpeg', '.png']
 
-    def __init__(self, directory: str, toolbar: object) -> None:
+    def __init__(self, toolbar: object = None, directory: str = None) -> None:
         '''
-        Constructor to initialize the object
+        Constructor to initialize the object. Requires named arguments. If the toolbar
+        argument is not given, the create_toolbar() method will create its own toolbar
+        named 'MyGizmos'. If the directory argument is not given, locate_running_file_path()
+        will attempt to find the location where this .py file lives. Inside this directory,
+        if there is a folder named 'gizmos', all tools from that folder will be loaded. If
+        no folder named 'gizmos' exists, the .nuke root directory will be used and all
+        tools will be loaded from there.
 
         Parameters
         ----------
@@ -21,8 +28,41 @@ class AutoLoader():
         toolbar: Nuke Toolbar
             The in-software Nuke toolbar to load the gizmos to
         '''
-        self.directory = directory
-        self.toolbar = toolbar
+        if not toolbar: self.toolbar = self.create_toolbar()
+        else: self.toolbar = toolbar
+
+        if not directory: self.directory = self.locate_running_file_path()
+        else: self.directory = directory
+
+    def create_toolbar(self) -> object:
+        '''
+        Creates a Nuke menu toolbar if no toolbar parameter is provided in the
+        __init__() by the user.
+
+        Returns
+        -------
+        myToolbar: object
+            A Nuke menu toolbar.
+        '''
+        myToolbar = nuke.menu('Nodes').addMenu('MyGizmos')
+        return myToolbar
+
+    def locate_running_file_path(self) -> str:
+        '''
+        Locates where this script is executing from and returns the path. This first
+        checks if a folder called 'gizmos' already exists in the directory, if so, return
+        that. Otherwise, return the .nuke root directory.
+
+        Returns
+        -------
+        folder: str
+            The path to the gizmos folder or current working directory
+        '''
+        cwd = pathlib.Path(__file__).parent.resolve()
+        for folder in cwd.glob('**/'):
+            if folder.name == 'gizmos':
+                return str(folder)
+        return str(cwd)
 
     def retrieve_relative_path(self, file: Path, relative_to: str = '.nuke') -> str:
         '''
@@ -99,6 +139,7 @@ class AutoLoader():
             icons = self.fetch_icons(folder)
             for file in folder.glob('*.*'):
                 if file.suffix in self.VALID_GIZMO_FILE_TYPES:
+                    if "preferences" in file.name: continue
                     shelf_name = self.retrieve_relative_path(file)
                     create_node = f"nuke.createNode('{file.stem}')"
                     if file.stem in icons:
