@@ -1,11 +1,13 @@
+'''
+AUTOLOADER.py 5.12.2022
+Compatible with Nuke 13
+Isaac Spiegel
+isaacspiegel.com
+'''
 import nuke
 import typing
 from pathlib import Path
 import pathlib
-'''
-TODO:
-- expand program to run with scripts and toolsets
-'''
 
 class AutoLoader():
     VALID_GIZMO_FILE_TYPES = ['.gizmo']
