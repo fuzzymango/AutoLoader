@@ -3,6 +3,8 @@ AUTOLOADER.py 5.12.2022
 Compatible with Nuke 13
 Isaac Spiegel
 isaacspiegel.com
+
+PLACE THIS FILE IN YOUR .nuke FOLDER AND ADD THE menu.py CODE
 '''
 import nuke
 import typing
